@@ -22,6 +22,7 @@ applyTheme();
 /* ---------- Durum ---------- */
 let pi=0,draft="",ctxLabel="Keşfet",timer={phase:null,left:0,int:null};
 const sess=()=>read("artventure-sess",null);
+const SECTIONS=[["koken","Köken"],["giris","Sanata giriş"],["yol","Yolculuk"],["etki","Etkilendikleri"],["evrim","Tarzın evrimi"],["eserler","Önemli eserler"]];
 const fmt=s=>String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
 const spark=`<svg class="spark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 7.1L21 12l-6.8 2.9L12 22l-2.2-7.1L3 12l6.8-2.9z"/></svg>`;
 const ring=(done,total)=>{const r=22,c=2*Math.PI*r,f=total?done/total:0;return `<svg class="ring" viewBox="0 0 54 54" aria-label="${done}/${total} tamamlandı"><circle cx="27" cy="27" r="${r}" stroke="var(--cloud)"/><circle cx="27" cy="27" r="${r}" stroke="var(--purple)" stroke-linecap="round" stroke-dasharray="${c*f} ${c}" transform="rotate(-90 27 27)"/></svg>`};
@@ -40,12 +41,26 @@ ${BIBLE_DEFAULT.map(p=>`<div class="card"><h3>${p.t}</h3><div class="sub">${p.d}
 dunyam(){ctxLabel="Benim dünyam";return{t:"Benim dünyam",back:"#kesfet",h:`<p class="sub">Karakterin, hayal ettiğin sahneler ve Usta'nın seni tanıması için notlar. Yalnızca bu telefonda saklanır; Usta sohbetlerinde bunu bilir.</p>
 <form class="card" id="worldF"><label for="world">Benim dünyam<textarea id="world" style="min-height:280px" placeholder="Örn. Karakterim meraklı, küçük bir uzaylı. Biri görünce saklanır…">${esc(pref.world)}</textarea></label><div class="row wrap"><button class="btn" type="submit">Kaydet</button><span class="status" id="wstat"></span></div></form>`}},
 kaynaklar(){ctxLabel="Kaynaklar";return{t:"Kaynaklar",back:"#kesfet",h:SOURCES.map(s=>`<div class="card"><span class="tag" style="background:var(--blue)">${s.cat}</span><ul class="tight">${s.items.map(i=>`<li>${i}</li>`).join("")}</ul></div>`).join("")+`<p class="note">Görseller telif nedeniyle uygulamaya kopyalanmadı; bağlantılar orijinal malzemeye götürür. Metinler İngilizce ve Japonca kaynaklardan Türkçeye özetlendi.</p>`}},
-sanatcilar(){ctxLabel="Sanatçılar";const grp=g=>ARTISTS.filter(a=>a.grp===g).map(a=>`<a class="card row" href="#sanatci-${a.id}"><span class="badge" style="background:${a.c}">${a.ini}</span><span style="min-width:0"><h3>${a.name}</h3><span class="sub">${a.role}</span></span></a>`).join("");
- const groups=[...new Set(ARTISTS.map(a=>a.grp))];return{t:"Sanatçılar",h:groups.map(g=>`<h2>${g}</h2>${grp(g)}`).join("")}},
-sanatci(id){const a=ARTISTS.find(x=>x.id===id);if(!a)return V.sanatcilar();ctxLabel=a.name;return{t:a.name,back:"#sanatcilar",h:`<div class="card row"><span class="badge" style="background:${a.c}">${a.ini}</span><span><h3>${a.name}</h3><span class="sub">${a.role}</span></span></div>
-<div class="card"><span class="tag" style="background:var(--blue)">Hayat hikâyesi</span>${a.life}</div><div class="card"><span class="tag" style="background:var(--teal)">Çalışma tarzı</span>${a.style}</div>
-<div class="card" style="background:var(--cream)"><span class="tag" style="background:var(--coral)">Bu hafta ondan çalacağın tek şey</span><p><b>${a.steal}</b></p></div>
-<div class="card"><span class="tag" style="background:var(--yellow)">Kaynaklar</span><ul class="tight">${a.src.map(s=>`<li>${s}</li>`).join("")}</ul></div>`}},
+kultur(){ctxLabel="Kültür";const rd=pref.read||{};
+ const card=a=>{const n=(rd[a.id]||[]).length;return `<a class="card row" href="#sanatci-${a.id}"><span class="badge" style="background:${a.c}">${a.ini}</span><span style="min-width:0;flex:1"><h3>${a.name}</h3><span class="sub">${a.role}</span></span>${n?ring(n,SECTIONS.length):""}</a>`};
+ const wa=ARTISTS.find(a=>a.id===WEEK_ARTIST[pref.week])||ARTISTS[0];
+ const ev=[];ARTISTS.forEach(a=>{if(a.born)ev.push({y:a.born,a,t:"doğar"});const m=(a.sig||"").match(/(19|20)\d{2}/);if(m)ev.push({y:+m[0],a,t:a.sig.replace(/\s*\(.*\)\s*/,"")})});ev.sort((x,y)=>x.y-y.y);
+ return{t:"Kültür",h:`<p class="sub">Sanatçılarla tanış: nerede büyüdüler, kapıyı ne açtı, kimden beslendiler, tarzları nasıl değişti.</p>
+<a class="card" href="#sanatci-${wa.id}" style="background:var(--cream)"><span class="tag" style="background:var(--yellow)">Bu haftanın sanatçısı</span><div class="row"><span class="badge" style="background:${wa.c}">${wa.ini}</span><span style="min-width:0"><h3>${wa.name}</h3><span class="sub">${wa.hook}</span></span></div></a>
+<h2>Zaman şeridi</h2><div class="tl" role="list">${ev.map(e=>`<a role="listitem" class="tlp" href="#sanatci-${e.a.id}"><b>${e.y}</b><span>${e.a.name}</span><small>${e.t}</small></a>`).join("")}</div>
+${GROUPS.map(g=>`<h2>${g}</h2>${ARTISTS.filter(a=>a.grp===g).map(card).join("")}`).join("")}`}},
+sanatci(id){const a=ARTISTS.find(x=>x.id===id);if(!a)return V.kultur();ctxLabel=a.name+" (Kültür)";const rd=(pref.read||{})[a.id]||[];
+ const mins=h=>Math.max(1,Math.round(h.replace(/<[^>]+>/g," ").split(/\s+/).filter(Boolean).length/180));
+ const body={koken:a.koken,giris:a.giris,
+  yol:a.yol.length?`<ol class="yol">${a.yol.map(([y,t])=>`<li><b>${y}</b><span>${t}</span></li>`).join("")}</ol>`:`<p class="note">Kaynak bulunamadı.</p>`,
+  etki:a.etki+(a.links.length?`<div class="haps">${a.links.map(l=>{const t=ARTISTS.find(x=>x.id===l.to);return t?`<a class="hap" href="#sanatci-${t.id}"><b>${t.name}</b> · ${l.type}<small>${l.note}</small></a>`:""}).join("")}</div>`:""),
+  evrim:a.evrim,eserler:`<ul class="tight">${a.eserler.map(e=>`<li>${e}</li>`).join("")}</ul>`};
+ const next=ARTISTS.find(x=>x.id===(a.links[0]||{}).to)||ARTISTS[(ARTISTS.indexOf(a)+1)%ARTISTS.length];
+ return{t:a.name,back:"#kultur",h:`<div class="card"><div class="row"><span class="badge" style="background:${a.c}">${a.ini}</span><span style="min-width:0"><h3>Kim o?</h3><span class="sub">${a.role}</span></span></div><p>${a.hook}</p><p class="sub"><b>İmza eser:</b> ${a.sig}</p></div>
+${SECTIONS.map(([k,t])=>`<details class="card sec" data-sec="${k}"><summary><span class="st-t">${t}</span><span class="sub">${mins(body[k])} dk</span>${rd.includes(k)?`<span class="dot done" aria-label="okundu"></span>`:`<span class="dot" aria-hidden="true"></span>`}</summary><div class="sec-b">${body[k]}</div></details>`).join("")}
+<div class="card" style="background:var(--cream)"><span class="tag" style="background:var(--coral)">Senin için</span><p><b>Bu hafta ondan çalacağın tek şey:</b> ${a.steal}</p><p><b>Gözlem:</b> ${a.soru}</p><p><b>Mini egzersiz:</b> ${a.egz}</p><div class="row wrap"><button class="btn small" type="button" id="kDone">Yaptım, günlüğe ekle</button><button class="btn ghost small" type="button" id="kAsk">Usta'ya sor</button><span class="status" id="kstat2"></span></div></div>
+<a class="card row" href="#sanatci-${next.id}"><span class="badge" style="background:${next.c}">${next.ini}</span><span style="min-width:0"><span class="eyebrow">Bu sanatçıdan sonra</span><h3>${next.name}</h3><span class="sub">${next.role}</span></span></a>
+<div class="card"><span class="tag" style="background:var(--yellow)">Kaynaklar</span><ul class="tight">${a.src.map(s=>`<li>${s}</li>`).join("")}</ul><p class="note">Metinler bu kaynaklardan Türkçeye özetlendi. Kaynakların çelişkili ya da eksik olduğu yerler not olarak belirtildi.</p></div>`}},
 bakis(){const m=pref.mode;ctxLabel="Bakış ("+(m==="kesif"?"keşif":"analiz")+" modu)";
  return{t:"Bakış",h:`<div class="seg" role="group" aria-label="Mod"><button type="button" data-mode="kesif" aria-pressed="${m==="kesif"}">Keşif modu</button><button type="button" data-mode="analiz" aria-pressed="${m==="analiz"}">Analiz modu</button></div>
 <p class="sub">${m==="kesif"?"Kural yok, eleştiri yok. Sadece merak.":"Referansa bak, sanatçının hangi kararı verdiğini sor."}</p>${PERSPECTIVES.filter(p=>p.mode===m).map(p=>`<div class="card"><h3>${p.title}</h3>${p.body}</div>`).join("")}`}},
@@ -79,7 +94,7 @@ function route(){
   const h=(location.hash||"#kesfet").slice(1);const m=h.match(/^(sanatci|konu)-(.+)$/);
   const v=m?V[m[1]](m[2]):(V[h]||V.kesfet)();
   $("title").textContent=v.t;$("view").innerHTML=v.h;$("back").hidden=!v.back;$("back").onclick=()=>{location.hash=v.back};
-  const tab=m?{sanatci:"sanatcilar",konu:"kesfet"}[m[1]]:({dunyam:"kesfet",bible:"kesfet",kaynaklar:"kesfet",oturum:"pratik",ayarlar:""}[h]??(V[h]?h:"kesfet"));
+  const tab=m?{sanatci:"kultur",konu:"kesfet"}[m[1]]:({dunyam:"kesfet",bible:"kesfet",kaynaklar:"kesfet",oturum:"pratik",ayarlar:""}[h]??(V[h]?h:"kesfet"));
   document.querySelectorAll("nav.tabbar a").forEach(a=>a.dataset.tab===tab?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
   bind(h);
 }
@@ -96,10 +111,16 @@ function bind(h){
   if($("newP"))$("newP").onclick=()=>{let n;do{n=Math.floor(Math.random()*PROMPTS.length)}while(n===pi&&PROMPTS.length>1);pi=n;$("prompt").textContent=PROMPTS[n]};
   v.querySelectorAll(".bibleF").forEach(f=>f.onsubmit=e=>{e.preventDefault();const k=f.dataset.k,inp=$("bi-"+k),t=inp.value.trim();if(!t)return;data.bible[k]=[...(data.bible[k]||[]),t];save();route()});
   v.querySelectorAll("[data-theme-set]").forEach(b=>b.onclick=()=>{pref.theme=b.dataset.themeSet;savePref();applyTheme();route()});
+  const am=h.match(/^sanatci-(.+)$/);if(am)bindArtist(am[1]);
   if(h==="oturum")bindSession();
   if(h==="gunluk")bindJournal();
   if(h==="ayarlar")bindSettings();
   if(h==="dunyam")$("worldF").onsubmit=e=>{e.preventDefault();pref.world=$("world").value.trim();$("wstat").textContent=savePref()?"Kaydedildi":"Kaydedilemedi"};
+}
+function bindArtist(id){const a=ARTISTS.find(x=>x.id===id);if(!a)return;
+  document.querySelectorAll("details.sec").forEach(d=>d.addEventListener("toggle",()=>{if(!d.open)return;const k=d.dataset.sec;pref.read=pref.read||{};const r=pref.read[id]=pref.read[id]||[];if(!r.includes(k)){r.push(k);savePref();const dot=d.querySelector(".dot");if(dot){dot.classList.add("done");dot.setAttribute("aria-label","okundu")}}}));
+  if($("kDone"))$("kDone").onclick=()=>{data.session.unshift({id:"s"+Date.now(),type:"kultur",task:a.name+": "+a.egz,at:Date.now(),q1:"",q2:"",q3:""});if(save()){$("kstat2").textContent="Günlüğe eklendi. Notlarını Günlük'te ekleyebilirsin.";$("kDone").disabled=true}};
+  if($("kAsk"))$("kAsk").onclick=()=>{openUsta();$("ask").value=a.usta;$("ask").focus()};
 }
 function bindSession(){
   const tick=()=>{timer.left--;if($("clock"))$("clock").textContent=fmt(Math.max(0,timer.left));if(timer.left<=0){clearInterval(timer.int);timer.int=null;if($("phaseHint"))$("phaseHint").textContent=timer.phase==="yasat"?"Süre doldu. Hazır olduğunda Güzelleştir aşamasına geç; istersen başka bir gün.":"Süre doldu. Aşağıdaki üç soruyla oturumu kapat."}};
@@ -127,7 +148,7 @@ function bindJournal(){
 function renderEntries(){const box=$("entries");if(!box)return;box.textContent="";
   const list=[...data.journal.map(d=>({...d,k:"j"})),...data.session.map(d=>({...d,k:"s"}))].sort((a,b)=>b.at-a.at);
   if(!list.length){box.innerHTML=`<div class="card empty"><svg viewBox="0 0 24 24" width="56" height="56" aria-hidden="true"><path d="M12 2.5l2.6 6.6 7 .5-5.4 4.5 1.7 6.9L12 17.2 6.1 21l1.7-6.9L2.4 9.6l7-.5z" fill="var(--yellow)" stroke="var(--line)" stroke-width="1.5" stroke-linejoin="round"/></svg><p class="sub">Henüz kayıt yok. İlk satırını yazdığında ya da bir pratik oturumunu kapattığında burada görünecek.</p></div>`;return}
-  list.forEach(d=>{const e=document.createElement("div");e.className="entry";const t=document.createElement("time");t.textContent=new Date(d.at).toLocaleString("tr-TR",{dateStyle:"medium",timeStyle:"short"})+(d.k==="s"?" · Pratik":"");e.appendChild(t);
+  list.forEach(d=>{const e=document.createElement("div");e.className="entry";const t=document.createElement("time");t.textContent=new Date(d.at).toLocaleString("tr-TR",{dateStyle:"medium",timeStyle:"short"})+(d.k==="s"?(d.type==="kultur"?" · Kültür":" · Pratik"):"");e.appendChild(t);
     const add=(k,v)=>{if(!v)return;const p=document.createElement("p");const b=document.createElement("b");b.textContent=k+": ";p.append(b,v);e.appendChild(p)};
     if(d.k==="s"){add("Görev",d.task);add("Ne oldu",d.q1);add("Tasarım problemi",d.q2);add("Görsel çözüm",d.q3);if(d.photo){const i=document.createElement("img");i.alt="Oturum çizimi";idb.get(d.id).then(u=>{if(u)i.src=u}).catch(()=>{});e.appendChild(i)}}
     else{add("Gördüm",d.seen);add("Çizdim",d.drew);add("Hissettim",(d.feel||[]).join(", "));add("İhtiyacım",(d.need||[]).join(", "));add("Not",d.note)}
