@@ -1,7 +1,7 @@
 /* Artventure service worker.
    Her yeni sürümde VERSION değişir (version.json ile aynı). Telefon yeni sürümü indirir,
    kullanıcı "Güncelle"ye dokunana kadar eski sürüm çalışmaya devam eder. */
-const VERSION = "1.1.0";
+const VERSION = "1.1.1";
 const CACHE = "artventure-" + VERSION;
 const SHELL = ["./", "index.html", "styles.css", "app.js", "content.js", "kultur.js", "manifest.webmanifest", "icons/icon.webp", "icons/icon-192.png", "icons/icon-512.png"];
 
