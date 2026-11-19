@@ -1,0 +1,7 @@
+node_modules/
+android/
+assets/
+web/icons/icon-192.png
+web/icons/icon-512.png
+*.apk
+private/

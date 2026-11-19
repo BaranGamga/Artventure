@@ -1,0 +1,12 @@
+{
+  "appId": "com.barangamga.artventure",
+  "appName": "Artventure",
+  "webDir": "web",
+  "server": {
+    "url": "https://barangamga.github.io/Artventure/",
+    "cleartext": false
+  },
+  "android": {
+    "backgroundColor": "#FFF6EC"
+  }
+}
