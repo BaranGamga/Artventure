@@ -5,6 +5,7 @@ Kişisel sanat atölyesi uygulaması (Türkçe). Kullanıcı 3D karakter sanatç
 ## Yapı
 - `web/` uygulamanın kendisi (statik, derleme yok). GitHub Pages'ten yayınlanır: https://barangamga.github.io/Artventure/
   - `content.js`: tüm içerik (sanatçılar, konular, Merak Defteri, 4 haftalık program, Usta'nın kuralları ve öğrenci profili). Yeni içerik buraya eklenir.
+  - `kultur.js`: Kültür sekmesindeki sanatçı profilleri (köken, sanata giriş, yolculuk, etkilendikleri, tarzın evrimi, eserler, bağlantılar). Yalnızca kaynakta yazan bilgi; çelişkiler `note` olarak belirtilir. Bağlantı türleri: akıl hocası, birlikte çalıştı, aynı ekip, dolaylı bağ.
   - `app.js`: görünümler, yerel kayıt (localStorage + IndexedDB), Usta sohbeti (Anthropic API, kullanıcının kendi anahtarı), güncelleme istemi.
   - `styles.css`: Usta'nın tema tokenları (gündüz/gece). Kontur siyah değil mor-kahve; saf beyaz ve saf siyah yok.
   - `sw.js` + `version.json`: güncelleme mekanizması.
